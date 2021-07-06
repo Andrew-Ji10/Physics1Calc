@@ -8,10 +8,15 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner test = new Scanner(System.in);
-        Kinematics kinematics = new Kinematics("","1","2","3","?");
-        System.out.println(kinematics.getAnswer());
-        String str = "";
-        System.out.println(str.isEmpty());
+        Kinematics kinematics = new Kinematics("1","4","5","","");
+
+
+        for(int i = 0; i < kinematics.getAnswer().length; i++ ){
+            System.out.println(kinematics.getAnswer()[i]);
+        }
+
+        System.out.println(kinematics.getAnswer().length);
+
 
     }
 }

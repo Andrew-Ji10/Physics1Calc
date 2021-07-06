@@ -1,143 +1,187 @@
 package Calculators.Mechanics;
 
+import java.util.ResourceBundle;
+
 public class Kinematics {
-    private double acceleration;
-    private double vInit;
-    private double vFinal;
-    private double time;
-    private double distance;
-    private double result;
+    private boolean hasAcceleration;
+    private boolean hasVInit;
+    private boolean hasVFinal;
+    private boolean hasTime;
+    private boolean hasDistance;
+    private double[] dataset;
+    private double[] result;
+    private int vType;
+    private int calcType;
 
     public Kinematics(String acceleration, String vInit, String vFinal, String time, String distance){
-        int calcType = 1;
-        int vType = 1;
+        dataset = new double[5];
+        result = new double[5];
+
         if (acceleration.isEmpty()){
-            calcType = 1;
-            if (vInit == "?"){
-                vType = 1;
-            } else if (vFinal == "?") {
-                vType = 2;
-            } else if (time == "?") {
-                vType = 3;
-            } else if (distance == "?"){
-                vType = 4;
-            }
+            hasAcceleration = false;
+            dataset[0] = 0.0;
+            result[0] = dataset[0];
         } else {
-            this.acceleration = Double.parseDouble(acceleration);
+            hasAcceleration = true;
+            dataset[0] = Double.parseDouble(acceleration);
+            result[0] = dataset[0];
         }
 
         if (vInit.isEmpty()){
-            calcType = 2;
-            if (acceleration == "?"){
-                vType = 1;
-            } else if (vFinal == "?") {
-                vType = 2;
-            } else if (time == "?") {
-                vType = 3;
-            } else if (distance == "?"){
-                vType = 4;
-            }
+            hasVInit = false;
+            dataset[1] = 0.0;
+            result[1] = dataset[1];
         } else {
-            this.vInit = Double.parseDouble(vInit);
+            hasVInit = true;
+            dataset[1] = Double.parseDouble(vInit);
+            result[1] = dataset[1];
         }
 
-        if (vFinal.isEmpty()){
-            calcType = 3;
-            if (acceleration == "?"){
-                vType = 1;
-            } else if (vInit == "?") {
-                vType = 2;
-            } else if (time == "?") {
-                vType = 3;
-            } else if (distance == "?"){
-                vType = 4;
-            }
+        if(vFinal.isEmpty()){
+            hasVFinal = false;
+            dataset[2] = 0.0;
+            result[2] = dataset[2];
         } else {
-            this.vFinal = Double.parseDouble(vInit);
+            hasVFinal = true;
+            dataset[2] = Double.parseDouble(vFinal);
+            result[2] = dataset[2];
         }
 
         if (time.isEmpty()){
-            calcType = 4;
-            if (acceleration == "?"){
-                vType = 1;
-            } else if (vInit == "?") {
-                vType = 2;
-            } else if (vFinal == "?") {
-                vType = 3;
-            } else if (distance == "?"){
-                vType = 4;
-            }
+            hasTime = false;
+            dataset[3] = 0.0;
+            result[3] = dataset[3];
         } else {
-            this.time = Double.parseDouble(vInit);
+            hasTime = true;
+            dataset[3] = Double.parseDouble(time);
+            result[3] = dataset[3];
         }
 
-        if (distance.isEmpty()){
-            calcType = 5;
-            if (acceleration == "?"){
-                vType = 1;
-            } else if (vInit == "?") {
-                vType = 2;
-            } else if (time == "?") {
-                vType = 3;
-            } else if (vFinal == "?"){
-                vType = 4;
-            }
+        if (distance.isEmpty()) {
+            hasDistance = false;
+            dataset[4] = 0.0;
+            result[4] = dataset[4];
         } else {
-            this.distance = Double.parseDouble(vInit);
+            hasDistance = true;
+            dataset[4] = Double.parseDouble(distance);
+            result[4] = dataset[4];
         }
 
-        result = execute(calcType, vType);
 
-    }
-
-    public double execute(int calcType, int vType){
-        switch (calcType) {
-            case 1:
-                return withoutAcceleration(vType);
-            case 2:
-                return withoutvInit(vType);
-            case 3:
-                return withoutvFinal(vType);
-            case 4:
-                return withoutTime(vType);
-            case 5:
-                return withoutDistance(vType);
+        if (!hasAcceleration){
+            result[0] = solveForAccel();
+            hasAcceleration = true;
+            dataset[0] = result[0];
         }
-        return 0;
-    }
 
-    public double withoutAcceleration(int vType){
-        switch (vType){
-            case 1:
-                return (((2 * distance)/time) - vFinal);
-            case 2:
-                return ((2 * distance)/time) - vInit;
-            case 3:
-                return distance/((vInit + vFinal)/2);
-            case 4:
-                return (vInit + vFinal) * time/2;
+        if (!hasVInit) {
+            result[1] = solveForvIn();
+            hasVInit = true;
+            dataset[1] = result[1];
         }
-        return 0;
+
+        if (!hasVFinal) {
+            result[2] = solveForvFin();
+            hasVFinal = true;
+            dataset[2] = result[2];
+        }
+
+        if (!hasTime) {
+            result[3] = solveForTime();
+            hasTime = true;
+            dataset[3] = result[3];
+        }
+
+        if(!hasDistance) {
+            result[4] = solveForDistance();
+            hasDistance = true;
+            dataset[4] = result[4];
+        }
 
     }
 
-    public double withoutvInit(int vType){
-        return 0;
+
+    public double solveForAccel(){
+        if (!hasVInit){
+            return ((dataset[2] * dataset[3]) - dataset[4]) * 2 / (dataset[3] * dataset[3]);
+        } else if (!hasVFinal) {
+            return ((dataset[4] - dataset[1] * dataset[3]) * 2) / (dataset[3] * dataset[3]);
+        } else if (!hasTime) {
+            return (dataset[2] * dataset[2] - dataset[1] * dataset[1]) / (2 * dataset[4]);
+        } else if (!hasDistance) {
+            return (dataset[2] - dataset[1])/dataset[3];
+        } else if (hasVInit && hasVFinal && hasTime && hasDistance) {
+            return (dataset[2] * dataset[3] - dataset[4]) * 2 / (dataset[3] * dataset[3]);
+        }
+            return 420.69;
+
+
     }
 
-    public double withoutvFinal(int vType){
-        return 0;
+    public double solveForvIn(){
+        if(!hasAcceleration){
+            return ((dataset[4] * 2) / dataset[3]) - dataset[2];
+        } else if (!hasVFinal) {
+            return (dataset[4] - (dataset[1] * dataset[3] * dataset [3])/2) / dataset[3];
+        } else if (!hasTime){
+            return Math.sqrt(dataset[2] * dataset[2] - 2 * dataset[0] * dataset[4]);
+        } else if (!hasDistance){
+            return dataset[2] - (dataset[0] * dataset[3]);
+        } else if (hasAcceleration && hasVFinal && hasTime && hasDistance){
+            return dataset[2] - (dataset[0] * dataset[3]);
+        }
+        return 420.69;
     }
 
-    public double withoutTime(int vType){
-        return 0;
+    public double solveForvFin(){
+        if(!hasAcceleration){
+            return dataset[1] + (dataset[0] * dataset[3]);
+        } else if (!hasVInit) {
+            return (dataset[4] + (dataset[0] * dataset[3] * dataset[3] / 2))/dataset[3];
+        } else if (!hasTime) {
+            return Math.sqrt(dataset[1] * dataset[1] + 2 * dataset[0] * dataset[4]);
+        } else if (!hasDistance) {
+            return dataset[1] + dataset[0] * dataset[3];
+        } else if (hasAcceleration && hasVInit && hasTime && hasDistance) {
+            return dataset[1] + dataset[0] * dataset[3];
+        }
+
+        return 420.69;
     }
 
-    public double withoutDistance(int vType){
-        return 0;
+    public double solveForTime(){
+        if (!hasAcceleration){
+            return (dataset[4] * 2) / (dataset[1] + dataset[2]);
+        } else if (!hasVInit) {
+            return (dataset[4] * 2) / (dataset[1] + dataset[2]);
+        } else if (!hasVFinal) {
+            return (dataset[4] * 2) / (dataset[1] + dataset[2]);
+        } else if (!hasDistance) {
+            return ((dataset[2] - dataset[1])/dataset[0]);
+        } else if (hasAcceleration && hasVInit && hasVFinal && hasDistance) {
+            return (dataset[4] * 2) / (dataset[1] + dataset[2]);
+        }
+
+        return 420.69;
     }
 
-    public double getAnswer(){
+    public double solveForDistance(){
+        if (!hasAcceleration){
+            return ((dataset[2] + dataset[1])/2) * dataset[3];
+        } else if (!hasVInit) {
+            return ((dataset[2] * dataset[3] - dataset[0] * dataset[3] * dataset[3] * 0.5));
+        } else if (!hasVFinal) {
+            return (dataset[1] * dataset[3] + dataset[0] * dataset[3] * dataset[3] * 0.5);
+        } else if (!hasTime) {
+            return (dataset[2] * dataset[2] - dataset[1] * dataset[1])/(2 * dataset[0]);
+        } else if (hasAcceleration && hasVInit && hasVFinal && hasTime) {
+            return ((dataset[2] + dataset[1])/2) * dataset[3];
+        }
+        return 420.69;
+    }
+
+
+    public double[] getAnswer(){
         return result;
     }
 }
